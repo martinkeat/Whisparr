@@ -1,0 +1,84 @@
+<?xml version="1.0"?>
+<Container version="2">
+  <Name>Nexus</Name>
+  <Repository>martinkeat/nexus:latest</Repository>
+  <Registry>https://hub.docker.com/r/martinkeat/nexus</Registry>
+  <Network>bridge</Network>
+  <MyIP/>
+  <Shell>bash</Shell>
+  <Privileged>false</Privileged>
+  <Support>https://github.com/martinkeat/Whisparr/issues</Support>
+  <Project>https://github.com/martinkeat/Whisparr</Project>
+  <Overview>Nexus is a unified media automation platform that integrates Sonarr, Radarr, Lidarr, Whisparr (fixed for adult metadata), Prowlarr, Overseerr, and download clients into a single, automated container with a premium dashboard.</Overview>
+  <Category>MediaApp:Video MediaApp:Music Downloaders:</Category>
+  <WebUI>http://[IP]:[PORT:8080]</WebUI>
+  <TemplateURL/>
+  <Icon>https://raw.githubusercontent.com/martinkeat/Whisparr/master/Logo.png</Icon>
+  <ExtraParams>--restart unless-stopped</ExtraParams>
+  <PostArgs/>
+  <CPUset/>
+  <DateInstalled>1715760000</DateInstalled>
+  <DonateText/>
+  <DonateLink/>
+  <Description>Unified Media Automation Platform</Description>
+  <Networking>
+    <Mode>bridge</Mode>
+    <Publish>
+      <Port>
+        <HostPort>8080</HostPort>
+        <ContainerPort>8080</ContainerPort>
+        <Protocol>tcp</Protocol>
+      </Port>
+    </Publish>
+  </Networking>
+  <Data>
+    <Volume>
+      <HostDir>/mnt/user/appdata/nexus</HostDir>
+      <ContainerDir>/config</ContainerDir>
+      <Mode>rw</Mode>
+    </Volume>
+    <Volume>
+      <HostDir>/mnt/user/downloads</HostDir>
+      <ContainerDir>/downloads</ContainerDir>
+      <Mode>rw</Mode>
+    </Volume>
+    <Volume>
+      <HostDir>/mnt/user/media_storage/movies</HostDir>
+      <ContainerDir>/movies</ContainerDir>
+      <Mode>rw</Mode>
+    </Volume>
+    <Volume>
+      <HostDir>/mnt/user/media_storage/tv</HostDir>
+      <ContainerDir>/tv</ContainerDir>
+      <Mode>rw</Mode>
+    </Volume>
+    <Volume>
+      <HostDir>/mnt/user/media_storage/whisparr</HostDir>
+      <ContainerDir>/adult</ContainerDir>
+      <Mode>rw</Mode>
+    </Volume>
+  </Data>
+  <Environment>
+    <Variable>
+      <Value>99</Value>
+      <Name>PUID</Name>
+      <Mode/>
+    </Variable>
+    <Variable>
+      <Value>100</Value>
+      <Name>PGID</Name>
+      <Mode/>
+    </Variable>
+    <Variable>
+      <Value>Etc/UTC</Value>
+      <Name>TZ</Name>
+      <Mode/>
+    </Variable>
+  </Environment>
+  <Config Name="WebUI Port" Target="8080" Default="8080" Mode="tcp" Description="Nexus Dashboard and API" Type="Port" Display="always" Required="true" Mask="false"/>
+  <Config Name="Appdata" Target="/config" Default="/mnt/user/appdata/nexus" Mode="rw" Description="Configuration storage" Type="Path" Display="always" Required="true" Mask="false"/>
+  <Config Name="Downloads" Target="/downloads" Default="/mnt/user/downloads" Mode="rw" Description="Download directory" Type="Path" Display="always" Required="true" Mask="false"/>
+  <Config Name="Movies" Target="/movies" Default="/mnt/user/media_storage/movies" Mode="rw" Description="Movies storage" Type="Path" Display="always" Required="true" Mask="false"/>
+  <Config Name="TV" Target="/tv" Default="/mnt/user/media_storage/tv" Mode="rw" Description="TV storage" Type="Path" Display="always" Required="true" Mask="false"/>
+  <Config Name="Adult" Target="/adult" Default="/mnt/user/media_storage/whisparr" Mode="rw" Description="Adult media storage" Type="Path" Display="always" Required="true" Mask="false"/>
+</Container>

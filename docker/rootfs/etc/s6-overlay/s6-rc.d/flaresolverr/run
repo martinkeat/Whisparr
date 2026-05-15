@@ -1,3 +1,12 @@
 #!/command/with-contenv bash
 echo "[Nexus] Starting FlareSolverr..."
-exec /opt/FlareSolverr/flaresolverr
+# Start Xvfb for headless browser
+Xvfb :99 -screen 0 1280x1024x24 &
+export DISPLAY=:99
+
+# Handle possible nesting in FlareSolverr releases
+if [ -f /opt/FlareSolverr/flaresolverr/flaresolverr ]; then
+    exec /opt/FlareSolverr/flaresolverr/flaresolverr
+else
+    exec /opt/FlareSolverr/flaresolverr
+fi

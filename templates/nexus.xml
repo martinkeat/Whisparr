@@ -1,0 +1,100 @@
+<?xml version="1.0"?>
+<Container version="2">
+  <Name>Nexus</Name>
+  <Repository>martinkeat/nexus</Repository>
+  <Registry>https://hub.docker.com/r/martinkeat/nexus/</Registry>
+  <Network>bridge</Network>
+  <MyIP/>
+  <Shell>bash</Shell>
+  <Privileged>false</Privileged>
+  <Support>https://github.com/martinkeat/nexus/issues</Support>
+  <Project>https://github.com/martinkeat/nexus</Project>
+  <Overview>Nexus is a high-performance, single-container media automation platform that integrates the entire Arr suite (Sonarr, Radarr, Lidarr, Whisparr, Prowlarr) with SABnzbd, qBittorrent, and Overseerr into a unified, easy-to-manage experience.</Overview>
+  <Category>MediaApp:Video MediaApp:Downloaders MediaApp:Other</Category>
+  <WebUI>http://[IP]:[PORT:8080]</WebUI>
+  <TemplateURL/>
+  <Icon>https://raw.githubusercontent.com/martinkeat/nexus/main/branding/logo.png</Icon>
+  <ExtraParams/>
+  <PostArgs/>
+  <CPUset/>
+  <DateInstalled/>
+  <DonateText/>
+  <DonateLink/>
+  <Description>Single-container media automation platform.</Description>
+  <Networking>
+    <Mode>bridge</Mode>
+    <Publish>
+      <Port>
+        <HostPort>8080</HostPort>
+        <ContainerPort>8080</ContainerPort>
+        <Protocol>tcp</Protocol>
+      </Port>
+    </Publish>
+  </Networking>
+  <Data>
+    <Volume>
+      <HostDir>/mnt/user/appdata/nexus</HostDir>
+      <ContainerDir>/config</ContainerDir>
+      <Mode>rw</Mode>
+    </Volume>
+    <Volume>
+      <HostDir>/mnt/user/downloads</HostDir>
+      <ContainerDir>/downloads</ContainerDir>
+      <Mode>rw</Mode>
+    </Volume>
+    <Volume>
+      <HostDir>/mnt/user/media_storage/sonarr</HostDir>
+      <ContainerDir>/tv</ContainerDir>
+      <Mode>rw</Mode>
+    </Volume>
+    <Volume>
+      <HostDir>/mnt/user/media_storage/radarr</HostDir>
+      <ContainerDir>/movies</ContainerDir>
+      <Mode>rw</Mode>
+    </Volume>
+    <Volume>
+      <HostDir>/mnt/user/media_storage/lidarr</HostDir>
+      <ContainerDir>/music</ContainerDir>
+      <Mode>rw</Mode>
+    </Volume>
+    <Volume>
+      <HostDir>/mnt/user/media_storage/whisparr</HostDir>
+      <ContainerDir>/adult</ContainerDir>
+      <Mode>rw</Mode>
+    </Volume>
+    <Volume>
+      <HostDir>/mnt/user/appdata/nexus/transcode</HostDir>
+      <ContainerDir>/transcode</ContainerDir>
+      <Mode>rw</Mode>
+    </Volume>
+  </Data>
+  <Environment>
+    <Variable>
+      <Value>99</Value>
+      <Name>PUID</Name>
+      <Mode/>
+    </Variable>
+    <Variable>
+      <Value>100</Value>
+      <Name>PGID</Name>
+      <Mode/>
+    </Variable>
+    <Variable>
+      <Value>Etc/UTC</Value>
+      <Name>TZ</Name>
+      <Mode/>
+    </Variable>
+  </Environment>
+  <Labels/>
+  <Config Name="WebUI" Target="8080" Default="8080" Mode="tcp" Description="Nexus Web Interface" Type="Port" Display="always" Required="true" Mask="false">8080</Config>
+  <Config Name="Appdata" Target="/config" Default="/mnt/user/appdata/nexus" Mode="rw" Description="Nexus Configuration Files" Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/nexus</Config>
+  <Config Name="Downloads" Target="/downloads" Default="/mnt/user/downloads" Mode="rw" Description="Download Storage" Type="Path" Display="always" Required="true" Mask="false">/mnt/user/downloads</Config>
+  <Config Name="TV" Target="/tv" Default="/mnt/user/media_storage/sonarr" Mode="rw" Description="TV Library" Type="Path" Display="always" Required="true" Mask="false">/mnt/user/media_storage/sonarr</Config>
+  <Config Name="Movies" Target="/movies" Default="/mnt/user/media_storage/radarr" Mode="rw" Description="Movie Library" Type="Path" Display="always" Required="true" Mask="false">/mnt/user/media_storage/radarr</Config>
+  <Config Name="Music" Target="/music" Default="/mnt/user/media_storage/lidarr" Mode="rw" Description="Music Library" Type="Path" Display="always" Required="true" Mask="false">/mnt/user/media_storage/lidarr</Config>
+  <Config Name="Adult" Target="/adult" Default="/mnt/user/media_storage/whisparr" Mode="rw" Description="Adult Library" Type="Path" Display="always" Required="true" Mask="false">/mnt/user/media_storage/whisparr</Config>
+  <Config Name="Transcode" Target="/transcode" Default="/mnt/user/appdata/nexus/transcode" Mode="rw" Description="Transcode Workspace" Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/nexus/transcode</Config>
+  <Config Name="PUID" Target="PUID" Default="99" Mode="" Description="User ID for file permissions" Type="Variable" Display="advanced" Required="false" Mask="false">99</Config>
+  <Config Name="PGID" Target="PGID" Default="100" Mode="" Description="Group ID for file permissions" Type="Variable" Display="advanced" Required="false" Mask="false">100</Config>
+  <Config Name="TZ" Target="TZ" Default="Etc/UTC" Mode="" Description="Timezone" Type="Variable" Display="advanced" Required="false" Mask="false">Etc/UTC</Config>
+</Container>

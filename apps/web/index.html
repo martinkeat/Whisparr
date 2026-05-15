@@ -40,7 +40,7 @@
           <div class="collapse navbar-collapse" id="sidebar-menu">
             <ul class="navbar-nav pt-lg-3">
               <li class="nav-item active">
-                <a class="nav-link" href="./">
+                <a class="nav-link" href="#" onclick="showView('dashboard')">
                   <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="ti ti-dashboard"></i></span>
                   <span class="nav-link-title">Overview</span>
                 </a>
@@ -89,7 +89,7 @@
                 </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="#settings">
+                <a class="nav-link" href="#" onclick="showView('settings')">
                   <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="ti ti-settings"></i></span>
                   <span class="nav-link-title">Settings</span>
                 </a>
@@ -113,11 +113,53 @@
         <!-- Page body -->
         <div class="page-body">
           <div class="container-xl" id="nexus-content">
-            <div class="row row-deck row-cards">
-              <!-- Service Health Cards (JS will populate) -->
+            <div id="view-dashboard" class="row row-deck row-cards">
+              <!-- Stats Cards -->
+              <div class="col-sm-6 col-lg-3">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="d-flex align-items-center">
+                      <div class="subheader">Active Downloads</div>
+                    </div>
+                    <div class="h1 mb-3" id="stat-downloads">-</div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-6 col-lg-3">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="d-flex align-items-center">
+                      <div class="subheader">Movies</div>
+                    </div>
+                    <div class="h1 mb-3" id="stat-movies">-</div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-6 col-lg-3">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="d-flex align-items-center">
+                      <div class="subheader">Episodes</div>
+                    </div>
+                    <div class="h1 mb-3" id="stat-episodes">-</div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-6 col-lg-3">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="d-flex align-items-center">
+                      <div class="subheader">Storage Free</div>
+                    </div>
+                    <div class="h1 mb-3" id="stat-storage">-</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Service Health -->
               <div class="col-12">
                 <div class="card">
-                  <div class="card-header"><h3 class="card-title">System Health</h3></div>
+                  <div class="card-header"><h3 class="card-title">System Health & Control</h3></div>
                   <div class="table-responsive">
                     <table class="table card-table table-vcenter text-nowrap datatable">
                       <thead>
@@ -125,14 +167,27 @@
                           <th>Service</th>
                           <th>Status</th>
                           <th>Version</th>
-                          <th>Uptime</th>
-                          <th></th>
+                          <th>Control</th>
                         </tr>
                       </thead>
                       <tbody id="service-table-body">
                         <!-- Populated by JS -->
                       </tbody>
                     </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div id="view-settings" class="row row-deck row-cards d-none">
+              <div class="col-12">
+                <div class="card">
+                  <div class="card-header"><h3 class="card-title">Nexus Modules</h3></div>
+                  <div class="card-body">
+                    <p class="text-muted">Enable or disable Nexus modules. All configurations are handled automatically.</p>
+                    <div id="settings-fields" class="divide-y">
+                      <!-- Toggles populated by JS -->
+                    </div>
                   </div>
                 </div>
               </div>
@@ -144,29 +199,50 @@
     <!-- Libs JS -->
     <script src="https://cdn.jsdelivr.net/npm/@tabler/core@latest/dist/js/tabler.min.js" defer></script>
     <script>
-      async function updateStatus() {
+    async function updateStatus() {
         try {
           const response = await fetch('/api/status');
           const data = await response.json();
+          
+          // Update Stats
+          document.getElementById('stat-downloads').textContent = data.stats.active_downloads;
+          document.getElementById('stat-movies').textContent = data.stats.total_movies.toLocaleString();
+          document.getElementById('stat-episodes').textContent = data.stats.total_episodes.toLocaleString();
+          document.getElementById('stat-storage').textContent = data.stats.disk_free;
+
           const tableBody = document.getElementById('service-table-body');
           tableBody.innerHTML = '';
 
           for (const [name, status] of Object.entries(data.services)) {
+            // Only show enabled services in the health table
+            if (status.health === 'disabled') continue;
+
             const tr = document.createElement('tr');
             
             let statusBadge = '<span class="badge bg-secondary">Unknown</span>';
             if (status.health === 'healthy') statusBadge = '<span class="badge bg-success">Healthy</span>';
             else if (status.health === 'starting') statusBadge = '<span class="badge bg-info">Starting</span>';
+            else if (status.health === 'stopped') statusBadge = '<span class="badge bg-danger">Stopped</span>';
             else if (status.health === 'error') statusBadge = '<span class="badge bg-danger">Error</span>';
-            else if (status.health === 'unconfigured') statusBadge = '<span class="badge bg-warning">Setup Required</span>';
+            else if (status.health === 'unconfigured') statusBadge = '<span class="badge bg-warning">Configuring...</span>';
 
             tr.innerHTML = `
-              <td><div class="d-flex align-items-center"><span class="avatar avatar-sm me-2" style="background-image: url(./branding/nexus-mark.svg)"></span> ${name}</div></td>
+              <td>
+                <div class="d-flex align-items-center">
+                  <span class="avatar avatar-xs me-2 bg-primary-lt"><i class="ti ti-settings"></i></span>
+                  <div>
+                    <div class="font-weight-medium">${name.charAt(0).toUpperCase() + name.slice(1)}</div>
+                  </div>
+                </div>
+              </td>
               <td>${statusBadge}</td>
-              <td>${status.version || 'N/A'}</td>
-              <td>-</td>
-              <td class="text-end">
-                <button class="btn btn-sm btn-ghost-primary" onclick="restartService('${name}')">Restart</button>
+              <td><code class="text-muted" style="font-size: 0.8rem;">${status.version || 'v0.0.0'}</code></td>
+              <td>
+                <div class="btn-list flex-nowrap">
+                  <button class="btn btn-xs btn-white" onclick="controlService('${name}', 'start')">Start</button>
+                  <button class="btn btn-xs btn-white" onclick="controlService('${name}', 'stop')">Stop</button>
+                  <button class="btn btn-xs btn-primary" onclick="controlService('${name}', 'restart')">Restart</button>
+                </div>
               </td>
             `;
             tableBody.appendChild(tr);
@@ -176,9 +252,63 @@
         }
       }
 
-      async function restartService(name) {
-        await fetch(`/api/services/${name}/restart`, { method: 'POST' });
-        updateStatus();
+      function showView(viewName) {
+        document.getElementById('view-dashboard').classList.add('d-none');
+        document.getElementById('view-settings').classList.add('d-none');
+        document.getElementById('view-' + viewName).classList.remove('d-none');
+        
+        document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
+        if (viewName === 'settings') {
+          loadSettings();
+        }
+      }
+
+      async function loadSettings() {
+        try {
+          const response = await fetch('/api/settings');
+          const settings = await response.json();
+          const fields = document.getElementById('settings-fields');
+          fields.innerHTML = '';
+
+          const services = ['sonarr', 'radarr', 'lidarr', 'whisparr', 'prowlarr', 'overseerr', 'qbittorrent', 'sabnzbd', 'flaresolverr'];
+          
+          services.forEach(name => {
+            const config = settings.services[name] || {};
+            const row = document.createElement('div');
+            row.className = 'py-3';
+            row.innerHTML = `
+              <div class="row align-items-center">
+                <div class="col">
+                  <div class="font-weight-medium">${name.toUpperCase()}</div>
+                  <div class="text-muted">Automated media module</div>
+                </div>
+                <div class="col-auto">
+                  <label class="form-check form-switch m-0">
+                    <input class="form-check-input" type="checkbox" ${config.enabled ? 'checked' : ''} onchange="toggleService('${name}', this.checked)">
+                  </label>
+                </div>
+              </div>
+            `;
+            fields.appendChild(row);
+          });
+        } catch (error) {
+          console.error('Failed to load settings:', error);
+        }
+      }
+
+      async function toggleService(name, enabled) {
+        try {
+          const response = await fetch('/api/settings/toggle', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, enabled })
+          });
+          if (response.ok) {
+            updateStatus();
+          }
+        } catch (error) {
+          console.error('Failed to toggle service:', error);
+        }
       }
 
       // Initial load

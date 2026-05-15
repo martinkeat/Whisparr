@@ -1,4 +1,5 @@
 #!/command/with-contenv bash
 echo "[Nexus] Starting Overseerr..."
 export CONFIG_DIRECTORY=/config/overseerr
-exec /opt/Overseerr/overseerr
+cd /opt/Overseerr
+exec /usr/bin/node dist/index.js
