@@ -5,8 +5,10 @@
 # Stage 2: Build Whisparr
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS whisparr-build
 WORKDIR /src
-COPY whisparr-dev /src
-RUN cd /src/src && dotnet restore Whisparr.sln && dotnet build Whisparr.sln -c Release --no-restore
+RUN apt-get update && apt-get install -y git && \
+    git clone https://github.com/martinkeat/Whisparr.git . && \
+    git checkout v2-develop && \
+    cd src && dotnet restore Whisparr.sln && dotnet build Whisparr.sln -c Release --no-restore
 
 # Stage 3: Overseerr Source
 FROM sctx/overseerr:latest AS overseerr-source
