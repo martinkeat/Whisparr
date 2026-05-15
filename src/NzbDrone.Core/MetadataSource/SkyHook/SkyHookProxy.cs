@@ -15,6 +15,8 @@ using NzbDrone.Core.MetadataSource.SkyHook.Resource;
 using NzbDrone.Core.Parser;
 using NzbDrone.Core.Tv;
 
+using NzbDrone.Core.MetadataSource.ThePornDB;
+
 namespace NzbDrone.Core.MetadataSource.SkyHook
 {
     public class SkyHookProxy : IProvideSeriesInfo, ISearchForNewSeries
@@ -22,18 +24,21 @@ namespace NzbDrone.Core.MetadataSource.SkyHook
         private readonly IHttpClient _httpClient;
         private readonly Logger _logger;
         private readonly ISeriesService _seriesService;
+        private readonly IThePornDBProxy _tpdbProxy;
         private readonly IHttpRequestBuilderFactory _requestBuilder;
 
         public SkyHookProxy(IHttpClient httpClient,
                             IWhisparrCloudRequestBuilder requestBuilder,
                             IConfigFileProvider configFileProvider,
                             ISeriesService seriesService,
+                            IThePornDBProxy tpdbProxy,
                             Logger logger)
         {
             _httpClient = httpClient;
             _requestBuilder = requestBuilder.WhisparrMetadata;
             _logger = logger;
             _seriesService = seriesService;
+            _tpdbProxy = tpdbProxy;
 
             var metadataUrl = configFileProvider.WhisparrMetadata;
 
@@ -57,32 +62,40 @@ namespace NzbDrone.Core.MetadataSource.SkyHook
 
         public Tuple<Series, List<Episode>> GetSeriesInfo(int tvdbSeriesId)
         {
-            var httpRequest = _requestBuilder.Create()
-                                             .SetSegment("route", "site")
-                                             .Resource(tvdbSeriesId.ToString())
-                                             .Build();
-
-            httpRequest.AllowAutoRedirect = true;
-            httpRequest.SuppressHttpError = true;
-
-            var httpResponse = _httpClient.Get<ShowResource>(httpRequest);
-
-            if (httpResponse.HasHttpError)
+            try
             {
-                if (httpResponse.StatusCode == HttpStatusCode.NotFound)
+                var httpRequest = _requestBuilder.Create()
+                                                 .SetSegment("route", "site")
+                                                 .Resource(tvdbSeriesId.ToString())
+                                                 .Build();
+
+                httpRequest.AllowAutoRedirect = true;
+                httpRequest.SuppressHttpError = true;
+
+                var httpResponse = _httpClient.Get<ShowResource>(httpRequest);
+
+                if (httpResponse.HasHttpError)
                 {
-                    throw new SeriesNotFoundException(tvdbSeriesId);
+                    if (httpResponse.StatusCode == HttpStatusCode.NotFound)
+                    {
+                        throw new SeriesNotFoundException(tvdbSeriesId);
+                    }
+                    else
+                    {
+                        throw new HttpException(httpRequest, httpResponse);
+                    }
                 }
-                else
-                {
-                    throw new HttpException(httpRequest, httpResponse);
-                }
+
+                var episodes = httpResponse.Resource.Episodes.Select(MapEpisode);
+                var series = MapSeries(httpResponse.Resource);
+
+                return new Tuple<Series, List<Episode>>(series, episodes.ToList());
             }
-
-            var episodes = httpResponse.Resource.Episodes.Select(MapEpisode);
-            var series = MapSeries(httpResponse.Resource);
-
-            return new Tuple<Series, List<Episode>>(series, episodes.ToList());
+            catch (SeriesNotFoundException)
+            {
+                _logger.Debug("Series {0} not found in Skyhook, falling back to ThePornDB", tvdbSeriesId);
+                return _tpdbProxy.GetSeriesInfo(tvdbSeriesId);
+            }
         }
 
         public List<Series> SearchForNewSeries(string title)
@@ -97,7 +110,8 @@ namespace NzbDrone.Core.MetadataSource.SkyHook
 
                     if (slug.IsNullOrWhiteSpace() || slug.Any(char.IsWhiteSpace) || !int.TryParse(slug, out var tvdbId) || tvdbId <= 0)
                     {
-                        return new List<Series>();
+                        // If it's not a numeric ID, treat it as a search query for TPDB
+                        return _tpdbProxy.SearchForNewSeries(slug);
                     }
 
                     try
@@ -108,7 +122,7 @@ namespace NzbDrone.Core.MetadataSource.SkyHook
                             return new List<Series> { existingSeries };
                         }
 
-                        return new List<Series> { GetSeriesInfo(tvdbId).Item1 };
+                        return new List<Series> { _tpdbProxy.GetSeriesInfo(tvdbId).Item1 };
                     }
                     catch (SeriesNotFoundException)
                     {
