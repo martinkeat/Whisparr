@@ -137,10 +137,10 @@ RUN mkdir -p \
     /transcode
 
 # Copy web frontend
-COPY nexus/apps/web /app/web
+COPY apps/web /app/web
 
 # Copy branding
-COPY nexus/branding /app/branding
+COPY branding /app/branding
 
 # Copy Whisparr
 COPY --from=whisparr-build /src/_output/net6.0 /opt/Whisparr
@@ -151,15 +151,15 @@ RUN chmod +x /opt/Whisparr/Whisparr
 COPY --from=overseerr-source /app /opt/Overseerr
 
 # Copy Nexus application code
-COPY nexus/apps/api /app/api
-COPY nexus/apps/worker /app/worker
-COPY nexus/apps/transcoder /app/transcoder
+COPY apps/api /app/api
+COPY apps/worker /app/worker
+COPY apps/transcoder /app/transcoder
 
 # Install API dependencies
 RUN /app/venv/bin/pip install --no-cache-dir fastapi uvicorn pydantic pyyaml aiohttp
 
 # Copy Docker rootfs (scripts, s6-overlay configs)
-COPY nexus/docker/rootfs /
+COPY docker/rootfs /
 
 # Expose Nexus GUI/API port
 EXPOSE 8080
