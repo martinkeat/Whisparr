@@ -3,7 +3,7 @@
 # unless a real build step (like npm build) is added later.
 
 # Stage 2: Build Whisparr
-FROM mcr.microsoft.com/dotnet/sdk:9.0 AS whisparr-build
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS whisparr-build
 WORKDIR /src
 RUN apt-get update && apt-get install -y git && \
     git clone https://github.com/Whisparr/Whisparr.git . && \
@@ -143,7 +143,7 @@ COPY apps/web /app/web
 COPY branding /app/branding
 
 # Copy Whisparr
-COPY --from=whisparr-build /src/_output/net6.0 /opt/Whisparr
+COPY --from=whisparr-build /src/_output/net8.0 /opt/Whisparr
 RUN chmod +x /opt/Whisparr/Whisparr
 
 # Copy Overseerr from source image
