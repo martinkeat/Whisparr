@@ -11,7 +11,7 @@
   <Project>https://github.com/martinkeat/Whisparr</Project>
   <Overview>Nexus is a unified media automation platform that integrates Sonarr, Radarr, Lidarr, Whisparr (fixed for adult metadata), Prowlarr, Overseerr, and download clients into a single, automated container with a premium dashboard.</Overview>
   <Category>MediaApp:Video MediaApp:Music Downloaders:</Category>
-  <WebUI>http://10.0.10.231:8080/</WebUI>
+  <WebUI>http://[IP]:[PORT:8080]</WebUI>
   <TemplateURL/>
   <Icon>https://raw.githubusercontent.com/martinkeat/Whisparr/master/Logo.png</Icon>
   <ExtraParams>--restart unless-stopped</ExtraParams>
