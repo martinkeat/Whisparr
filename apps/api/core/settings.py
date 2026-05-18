@@ -73,6 +73,11 @@ class Settings:
             except Exception as e:
                 print(f"Error discovering sabnzbd key: {e}")
 
+        # qBittorrent
+        if "qbittorrent" not in self.config.services:
+            self.config.services["qbittorrent"] = ServiceConfig(enabled=True)
+            self.config.services["qbittorrent"].url = "http://127.0.0.1:8091"
+
         self.save_config()
 
 settings = Settings()

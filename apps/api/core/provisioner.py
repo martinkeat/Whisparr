@@ -64,6 +64,21 @@ class Provisioner:
                     ]
                 })
 
+            # 3. Set up Download Clients (qBittorrent)
+            if "qbittorrent" in settings.config.services:
+                await session.post(f"{url}/api/v3/downloadclient", headers=headers, json={
+                    "enable": True,
+                    "name": "qBittorrent (Nexus)",
+                    "implementation": "QBittorrent",
+                    "configContract": "QBittorrentSettings",
+                    "fields": [
+                        {"name": "host", "value": "127.0.0.1"},
+                        {"name": "port", "value": 8091},
+                        {"name": "username", "value": "admin"},
+                        {"name": "password", "value": "adminadmin"}
+                    ]
+                })
+
     async def _provision_prowlarr(self):
         adapter = self.adapters["prowlarr"]
         api_key = settings.config.services["prowlarr"].api_key

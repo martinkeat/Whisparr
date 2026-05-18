@@ -11,7 +11,7 @@
   <Project>https://github.com/martinkeat/Whisparr</Project>
   <Overview>Nexus is a unified media automation platform that integrates Sonarr, Radarr, Lidarr, Whisparr (fixed for adult metadata), Prowlarr, Overseerr, and download clients into a single, automated container with a premium dashboard.</Overview>
   <Category>MediaApp:Video MediaApp:Music Downloaders:</Category>
-  <WebUI>http://[IP]:[PORT:8080]</WebUI>
+  <WebUI>http://10.0.10.231:8080/</WebUI>
   <TemplateURL/>
   <Icon>https://raw.githubusercontent.com/martinkeat/Whisparr/master/Logo.png</Icon>
   <ExtraParams>--restart unless-stopped</ExtraParams>
@@ -29,16 +29,6 @@
         <ContainerPort>8080</ContainerPort>
         <Protocol>tcp</Protocol>
       </Port>
-      <Port><HostPort>8091</HostPort><ContainerPort>8091</ContainerPort><Protocol>tcp</Protocol></Port>
-      <Port><HostPort>6881</HostPort><ContainerPort>6881</ContainerPort><Protocol>tcp</Protocol></Port>
-      <Port><HostPort>6881</HostPort><ContainerPort>6881</ContainerPort><Protocol>udp</Protocol></Port>
-      <Port><HostPort>8081</HostPort><ContainerPort>8081</ContainerPort><Protocol>tcp</Protocol></Port>
-      <Port><HostPort>8989</HostPort><ContainerPort>8989</ContainerPort><Protocol>tcp</Protocol></Port>
-      <Port><HostPort>7878</HostPort><ContainerPort>7878</ContainerPort><Protocol>tcp</Protocol></Port>
-      <Port><HostPort>8686</HostPort><ContainerPort>8686</ContainerPort><Protocol>tcp</Protocol></Port>
-      <Port><HostPort>6969</HostPort><ContainerPort>6969</ContainerPort><Protocol>tcp</Protocol></Port>
-      <Port><HostPort>9696</HostPort><ContainerPort>9696</ContainerPort><Protocol>tcp</Protocol></Port>
-      <Port><HostPort>5055</HostPort><ContainerPort>5055</ContainerPort><Protocol>tcp</Protocol></Port>
     </Publish>
   </Networking>
   <Data>
@@ -86,14 +76,6 @@
     </Variable>
   </Environment>
   <Config Name="WebUI Port" Target="8080" Default="8080" Mode="tcp" Description="Nexus Dashboard and API" Type="Port" Display="always" Required="true" Mask="false"/>
-  <Config Name="qBittorrent WebUI" Target="8091" Default="8091" Mode="tcp" Description="qBittorrent" Type="Port" Display="advanced-hide" Required="false" Mask="false"/>
-  <Config Name="SABnzbd WebUI" Target="8081" Default="8081" Mode="tcp" Description="SABnzbd" Type="Port" Display="advanced-hide" Required="false" Mask="false"/>
-  <Config Name="Sonarr" Target="8989" Default="8989" Mode="tcp" Description="Sonarr" Type="Port" Display="advanced-hide" Required="false" Mask="false"/>
-  <Config Name="Radarr" Target="7878" Default="7878" Mode="tcp" Description="Radarr" Type="Port" Display="advanced-hide" Required="false" Mask="false"/>
-  <Config Name="Lidarr" Target="8686" Default="8686" Mode="tcp" Description="Lidarr" Type="Port" Display="advanced-hide" Required="false" Mask="false"/>
-  <Config Name="Whisparr" Target="6969" Default="6969" Mode="tcp" Description="Whisparr" Type="Port" Display="advanced-hide" Required="false" Mask="false"/>
-  <Config Name="Prowlarr" Target="9696" Default="9696" Mode="tcp" Description="Prowlarr" Type="Port" Display="advanced-hide" Required="false" Mask="false"/>
-  <Config Name="Overseerr" Target="5055" Default="5055" Mode="tcp" Description="Overseerr" Type="Port" Display="advanced-hide" Required="false" Mask="false"/>
   <Config Name="Appdata" Target="/config" Default="/mnt/user/appdata/nexus" Mode="rw" Description="Configuration storage" Type="Path" Display="always" Required="true" Mask="false"/>
   <Config Name="Downloads" Target="/downloads" Default="/mnt/user/downloads" Mode="rw" Description="Download directory" Type="Path" Display="always" Required="true" Mask="false"/>
   <Config Name="Movies" Target="/movies" Default="/mnt/user/media_storage/movies" Mode="rw" Description="Movies storage" Type="Path" Display="always" Required="true" Mask="false"/>
