@@ -16,8 +16,10 @@ using Newtonsoft.Json.Linq;
 
 namespace NzbDrone.Core.MetadataSource.ThePornDB
 {
-    public interface IThePornDBProxy : IProvideSeriesInfo, ISearchForNewSeries
+    public interface IThePornDBProxy
     {
+        Tuple<Series, List<Episode>> GetSeriesInfo(int tvdbSeriesId);
+        List<Series> SearchForNewSeries(string title);
     }
 
     public class ThePornDBProxy : IThePornDBProxy
