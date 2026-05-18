@@ -226,22 +226,42 @@
             else if (status.health === 'error') statusBadge = '<span class="badge bg-danger">Error</span>';
             else if (status.health === 'unconfigured') statusBadge = '<span class="badge bg-warning">Configuring...</span>';
 
+            const servicePorts = {
+              'sonarr': 8989,
+              'radarr': 7878,
+              'lidarr': 8686,
+              'whisparr': 6969,
+              'prowlarr': 9696,
+              'overseerr': 5055,
+              'sabnzbd': 8081,
+              'qbittorrent': 8091,
+              'flaresolverr': 8191
+            };
+
+            let openBtn = '';
+            if (servicePorts[name] && status.health === 'healthy') {
+              openBtn = `<a href="http://\${window.location.hostname}:\${servicePorts[name]}" target="_blank" class="btn btn-xs btn-outline-primary me-2">Open UI</a>`;
+            }
+
             tr.innerHTML = `
               <td>
                 <div class="d-flex align-items-center">
                   <span class="avatar avatar-xs me-2 bg-primary-lt"><i class="ti ti-settings"></i></span>
                   <div>
-                    <div class="font-weight-medium">${name.charAt(0).toUpperCase() + name.slice(1)}</div>
+                    <div class="font-weight-medium">\${name.charAt(0).toUpperCase() + name.slice(1)}</div>
                   </div>
                 </div>
               </td>
-              <td>${statusBadge}</td>
-              <td><code class="text-muted" style="font-size: 0.8rem;">${status.version || 'v0.0.0'}</code></td>
+              <td>\${statusBadge}</td>
+              <td><code class="text-muted" style="font-size: 0.8rem;">\${status.version || 'v0.0.0'}</code></td>
               <td>
-                <div class="btn-list flex-nowrap">
-                  <button class="btn btn-xs btn-white" onclick="controlService('${name}', 'start')">Start</button>
-                  <button class="btn btn-xs btn-white" onclick="controlService('${name}', 'stop')">Stop</button>
-                  <button class="btn btn-xs btn-primary" onclick="controlService('${name}', 'restart')">Restart</button>
+                <div class="d-flex align-items-center">
+                  \${openBtn}
+                  <div class="btn-list flex-nowrap">
+                    <button class="btn btn-xs btn-white" onclick="controlService('\${name}', 'start')">Start</button>
+                    <button class="btn btn-xs btn-white" onclick="controlService('\${name}', 'stop')">Stop</button>
+                    <button class="btn btn-xs btn-primary" onclick="controlService('\${name}', 'restart')">Restart</button>
+                  </div>
                 </div>
               </td>
             `;
