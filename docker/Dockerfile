@@ -1,22 +1,17 @@
-# Stage 1: Build Web Frontend
-# We use the local source directly in the final stage for now
-# unless a real build step (like npm build) is added later.
+# ============================================================
+# Nexus — Single-container media automation platform
+# ============================================================
 
-# Stage 2: Build Whisparr
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS whisparr-build
-WORKDIR /src
-RUN apt-get update && apt-get install -y git && \
-    git clone https://github.com/Whisparr/Whisparr.git . && \
-    git checkout eros && \
-    cd src && dotnet restore Whisparr.sln && dotnet build Whisparr.sln -c Release --no-restore
+# Stage 1: Pull pre-built Whisparr v3 (eros) from hotio image
+# This avoids compiling the entire .NET solution and NuGet timeout issues.
+FROM ghcr.io/hotio/whisparr:nightly AS whisparr-source
 
-# Stage 3: Overseerr Source
+# Stage 2: Pull Overseerr from the official image
 FROM sctx/overseerr:latest AS overseerr-source
 
-# Stage 4: Final Image
+# Stage 3: Final Image
 FROM ubuntu:24.04
 
-# Metadata
 LABEL maintainer="spontaneocus"
 LABEL description="Nexus - Single-container media automation platform"
 
@@ -30,7 +25,7 @@ ENV PUID=99 \
     NODE_ENV=production
 
 # Install Base Dependencies
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     bash \
     curl \
     ca-certificates \
@@ -56,6 +51,7 @@ RUN apt-get update && apt-get install -y \
     libssl-dev \
     libxml2 \
     libxslt1.1 \
+    sqlite3 \
     # FlareSolverr / Chromium dependencies
     xvfb \
     libnss3 \
@@ -81,7 +77,7 @@ RUN curl -L https://github.com/just-containers/s6-overlay/releases/download/v3.1
     tar -C / -Jxpf /tmp/s6-x86_64.tar.xz && \
     rm /tmp/s6-noarch.tar.xz /tmp/s6-x86_64.tar.xz
 
-# Set up virtual environment early for all Python services
+# Set up virtual environment for Python services
 RUN python3 -m venv /app/venv
 ENV PATH="/app/venv/bin:$PATH"
 
@@ -92,8 +88,7 @@ RUN mkdir -p /opt/sabnzbd && \
     rm /tmp/sabnzbd.tar.gz && \
     /app/venv/bin/pip install --no-cache-dir -r /opt/sabnzbd/requirements.txt
 
-# Install Arr Suite and Indexing tools
-RUN mkdir -p /opt
+# ---- Arr Suite ----
 
 # Sonarr
 RUN curl -L "https://services.sonarr.tv/v1/download/main/latest?version=4&os=linux&arch=x64" -o /tmp/sonarr.tar.gz && \
@@ -121,7 +116,14 @@ RUN mkdir -p /opt/FlareSolverr && \
     tar -xzf /tmp/flaresolverr.tar.gz -C /opt/FlareSolverr --strip-components=1 && \
     rm /tmp/flaresolverr.tar.gz
 
-# Create directory structure
+# Whisparr v3 (eros) — pre-built from hotio image
+COPY --from=whisparr-source /app /opt/Whisparr
+RUN chmod +x /opt/Whisparr/Whisparr || true
+
+# Overseerr — pre-built from official image
+COPY --from=overseerr-source /app /opt/Overseerr
+
+# ---- Directory Structure ----
 RUN mkdir -p \
     /app/api \
     /app/web \
@@ -136,21 +138,9 @@ RUN mkdir -p \
     /adult \
     /transcode
 
-# Copy web frontend
+# ---- Application Code ----
 COPY apps/web /app/web
-
-# Copy branding
 COPY branding /app/branding
-
-# Copy Whisparr
-COPY --from=whisparr-build /src/_output/net8.0 /opt/Whisparr
-RUN chmod +x /opt/Whisparr/Whisparr
-
-# Copy Overseerr from source image
-# The official image has the app in /app
-COPY --from=overseerr-source /app /opt/Overseerr
-
-# Copy Nexus application code
 COPY apps/api /app/api
 COPY apps/worker /app/worker
 COPY apps/transcoder /app/transcoder
@@ -158,13 +148,13 @@ COPY apps/transcoder /app/transcoder
 # Install API dependencies
 RUN /app/venv/bin/pip install --no-cache-dir fastapi uvicorn pydantic pyyaml aiohttp
 
-# Copy Docker rootfs (scripts, s6-overlay configs)
+# Copy Docker rootfs (s6-overlay service definitions)
 COPY docker/rootfs /
 
-# Expose Nexus GUI/API port
+# ---- Ports ----
+# Nexus Dashboard / API
 EXPOSE 8080
-
-# BitTorrent ports
+# BitTorrent
 EXPOSE 6881/tcp
 EXPOSE 6881/udp
 
