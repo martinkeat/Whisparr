@@ -52,7 +52,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libxml2 \
     libxslt1.1 \
     sqlite3 \
-    musl \
     # FlareSolverr / Chromium dependencies
     xvfb \
     libnss3 \
@@ -69,8 +68,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libxrandr2 \
     libgbm1 \
     libasound2t64 \
-    && rm -rf /var/lib/apt/lists/* \
-    && ln -sf /usr/lib/x86_64-linux-musl/libc.so /lib/ld-musl-x86_64.so.1
+    && rm -rf /var/lib/apt/lists/*
+
+# Install .NET 6.0 Runtime (required for Whisparr v3)
+RUN curl -fsSL https://packages.microsoft.com/config/ubuntu/24.04/packages-microsoft-prod.deb -o /tmp/ms-prod.deb && \
+    dpkg -i /tmp/ms-prod.deb && rm /tmp/ms-prod.deb && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends dotnet-runtime-6.0 aspnetcore-runtime-6.0 && \
+    rm -rf /var/lib/apt/lists/*
 
 # Install s6-overlay
 RUN curl -L https://github.com/just-containers/s6-overlay/releases/download/v3.1.6.2/s6-overlay-noarch.tar.xz -o /tmp/s6-noarch.tar.xz && \

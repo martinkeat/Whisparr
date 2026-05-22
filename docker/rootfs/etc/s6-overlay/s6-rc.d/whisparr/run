@@ -1,3 +1,3 @@
 #!/command/with-contenv bash
 echo "[Nexus] Starting Whisparr..."
-exec /opt/Whisparr/bin/Whisparr -nobrowser -data=/config/whisparr
+exec dotnet /opt/Whisparr/bin/Whisparr.dll -nobrowser -data=/config/whisparr
