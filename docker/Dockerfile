@@ -70,12 +70,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libasound2t64 \
     && rm -rf /var/lib/apt/lists/*
 
-# Install .NET 6.0 Runtime (required for Whisparr v3)
-RUN curl -fsSL https://packages.microsoft.com/config/ubuntu/24.04/packages-microsoft-prod.deb -o /tmp/ms-prod.deb && \
-    dpkg -i /tmp/ms-prod.deb && rm /tmp/ms-prod.deb && \
-    apt-get update && \
-    apt-get install -y --no-install-recommends dotnet-runtime-6.0 aspnetcore-runtime-6.0 && \
-    rm -rf /var/lib/apt/lists/*
+# Install .NET 6.0 Runtime (required for Whisparr v3 — EOL on Ubuntu 24.04 so use install script)
+RUN curl -fsSL https://dot.net/v1/dotnet-install.sh -o /tmp/dotnet-install.sh && \
+    chmod +x /tmp/dotnet-install.sh && \
+    /tmp/dotnet-install.sh --channel 6.0 --runtime aspnetcore --install-dir /usr/share/dotnet && \
+    ln -sf /usr/share/dotnet/dotnet /usr/bin/dotnet && \
+    rm /tmp/dotnet-install.sh
 
 # Install s6-overlay
 RUN curl -L https://github.com/just-containers/s6-overlay/releases/download/v3.1.6.2/s6-overlay-noarch.tar.xz -o /tmp/s6-noarch.tar.xz && \
