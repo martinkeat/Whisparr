@@ -70,12 +70,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libasound2t64 \
     && rm -rf /var/lib/apt/lists/*
 
-# Install .NET 6.0 Runtime (required for Whisparr v3 — EOL on Ubuntu 24.04 so use install script)
-RUN curl -fsSL https://dot.net/v1/dotnet-install.sh -o /tmp/dotnet-install.sh && \
-    chmod +x /tmp/dotnet-install.sh && \
-    /tmp/dotnet-install.sh --channel 6.0 --runtime aspnetcore --install-dir /usr/share/dotnet && \
-    ln -sf /usr/share/dotnet/dotnet /usr/bin/dotnet && \
-    rm /tmp/dotnet-install.sh
+# Copy Alpine musl runtime libraries required by the hotio Whisparr binary
+# The self-contained binary links against musl libc, libstdc++, and libgcc_s
+COPY --from=whisparr-source /lib/ld-musl-x86_64.so.1 /lib/ld-musl-x86_64.so.1
+COPY --from=whisparr-source /usr/lib/libstdc++.so.6 /usr/lib/musl-libstdc++.so.6
+COPY --from=whisparr-source /usr/lib/libgcc_s.so.1 /usr/lib/musl-libgcc_s.so.1
+RUN mkdir -p /opt/Whisparr/lib && \
+    ln -sf /lib/ld-musl-x86_64.so.1 /lib/libc.musl-x86_64.so.1 && \
+    ln -sf /usr/lib/musl-libstdc++.so.6 /opt/Whisparr/lib/libstdc++.so.6 && \
+    ln -sf /usr/lib/musl-libgcc_s.so.1 /opt/Whisparr/lib/libgcc_s.so.1
 
 # Install s6-overlay
 RUN curl -L https://github.com/just-containers/s6-overlay/releases/download/v3.1.6.2/s6-overlay-noarch.tar.xz -o /tmp/s6-noarch.tar.xz && \

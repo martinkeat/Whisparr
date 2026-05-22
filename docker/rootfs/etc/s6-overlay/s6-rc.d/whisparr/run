@@ -1,3 +1,4 @@
 #!/command/with-contenv bash
 echo "[Nexus] Starting Whisparr..."
-exec dotnet /opt/Whisparr/bin/Whisparr.dll -nobrowser -data=/config/whisparr
+export LD_LIBRARY_PATH="/opt/Whisparr/lib:${LD_LIBRARY_PATH}"
+exec /opt/Whisparr/bin/Whisparr -nobrowser -data=/config/whisparr
