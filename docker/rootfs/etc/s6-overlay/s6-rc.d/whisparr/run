@@ -1,4 +1,7 @@
 #!/command/with-contenv bash
 echo "[Nexus] Starting Whisparr..."
 export LD_LIBRARY_PATH="/opt/Whisparr/lib:${LD_LIBRARY_PATH}"
+# The Alpine musl binary bundles .NET 6 which expects ICU.
+# Set invariant mode to bypass ICU requirement.
+export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=true
 exec /opt/Whisparr/bin/Whisparr -nobrowser -data=/config/whisparr

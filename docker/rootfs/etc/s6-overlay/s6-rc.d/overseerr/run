@@ -1,5 +1,14 @@
 #!/command/with-contenv bash
 echo "[Nexus] Starting Overseerr..."
 export CONFIG_DIRECTORY=/config/overseerr
+
 cd /opt/Overseerr
+
+# Rebuild native node modules (better-sqlite3) if needed
+if [ ! -f /opt/Overseerr/.native-built ]; then
+    echo "[Nexus] Rebuilding Overseerr native modules..."
+    npm rebuild better-sqlite3 2>/dev/null || true
+    touch /opt/Overseerr/.native-built
+fi
+
 exec /usr/bin/node dist/index.js

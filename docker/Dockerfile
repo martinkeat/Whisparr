@@ -46,6 +46,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     par2 \
     7zip \
     gcc \
+    g++ \
+    make \
     python3-dev \
     libffi-dev \
     libssl-dev \
@@ -132,6 +134,7 @@ RUN chmod +x /opt/Whisparr/Whisparr || true
 
 # Overseerr — pre-built from official image
 COPY --from=overseerr-source /app /opt/Overseerr
+RUN cd /opt/Overseerr && npm rebuild better-sqlite3 2>/dev/null || true
 
 # ---- Directory Structure ----
 RUN mkdir -p \
