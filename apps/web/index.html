@@ -189,7 +189,18 @@
             
             <div id="view-iframe" class="row row-deck row-cards d-none" style="height: calc(100vh - 12rem);">
               <div class="col-12">
-                <iframe id="content-iframe" src="" style="width: 100%; height: 100%; border: none; border-radius: 4px;"></iframe>
+                <div class="card h-100 d-flex flex-column justify-content-center align-items-center text-center">
+                  <div class="card-body d-flex flex-column justify-content-center align-items-center">
+                    <h2 class="h1 mb-4" id="launcher-title">Service</h2>
+                    <p class="text-muted mb-4" style="max-width: 400px;">
+                      This service cannot be embedded directly in the dashboard due to security restrictions (X-Frame-Options). 
+                      Click below to open it in a new secure window.
+                    </p>
+                    <a href="#" target="_blank" id="launcher-btn" class="btn btn-primary btn-lg px-5">
+                      Launch Service <i class="ti ti-external-link ms-2"></i>
+                    </a>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -265,23 +276,23 @@
                 loadSettings();
             }
         } else {
-            // It's an iframe view
+            // Show launcher view instead of iframe
             document.getElementById('view-iframe').classList.remove('d-none');
-            const iframe = document.getElementById('content-iframe');
             
-            // Map views to internal ports
             const portMap = {
-                'requests': 5055,
-                'downloads': 8090, // default to qbittorrent
-                'media-tv': 8989,
-                'media-movies': 7878,
-                'media-music': 8686,
-                'media-adult': 6969,
-                'indexers': 9696
+                'requests': { port: 5055, name: 'Overseerr' },
+                'downloads': { port: 8090, name: 'qBittorrent' },
+                'media-tv': { port: 8989, name: 'Sonarr' },
+                'media-movies': { port: 7878, name: 'Radarr' },
+                'media-music': { port: 8686, name: 'Lidarr' },
+                'media-adult': { port: 6969, name: 'Whisparr' },
+                'indexers': { port: 9696, name: 'Prowlarr' }
             };
             
             if (portMap[viewName]) {
-                iframe.src = window.location.protocol + "//" + window.location.hostname + ":" + portMap[viewName];
+                const svc = portMap[viewName];
+                document.getElementById('launcher-title').textContent = svc.name;
+                document.getElementById('launcher-btn').href = window.location.protocol + "//" + window.location.hostname + ":" + svc.port;
             }
         }
       }

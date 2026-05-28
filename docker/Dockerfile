@@ -140,8 +140,8 @@ RUN chmod +x /opt/Whisparr/Whisparr || true
 # Overseerr — pre-built from official image
 COPY --from=overseerr-source /app /opt/Overseerr
 RUN cd /opt/Overseerr && \
-    rm -rf node_modules/sqlite3/lib/binding/* && \
-    npm rebuild sqlite3 --build-from-source 2>&1 || true
+    rm -rf node_modules/sqlite3 && \
+    npm install sqlite3 --build-from-source --legacy-peer-deps 2>&1 || true
 
 # ---- Directory Structure ----
 RUN mkdir -p \

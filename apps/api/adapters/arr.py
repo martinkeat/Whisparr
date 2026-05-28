@@ -87,6 +87,20 @@ class LidarrAdapter(ArrAdapter):
     def __init__(self, internal_url: str = "http://127.0.0.1:8686"):
         super().__init__("lidarr", internal_url)
 
+    async def health_check(self) -> HealthStatus:
+        if not self.api_key:
+            return HealthStatus.UNCONFIGURED
+        try:
+            async with aiohttp.ClientSession() as session:
+                headers = {"X-Api-Key": self.api_key}
+                async with session.get(f"{self.internal_url}/api/v1/system/status", headers=headers, timeout=2) as resp:
+                    if resp.status == 200:
+                        return HealthStatus.HEALTHY
+                    return HealthStatus.ERROR
+        except Exception:
+            return HealthStatus.STOPPED
+
+
 class WhisparrAdapter(ArrAdapter):
     def __init__(self, internal_url: str = "http://127.0.0.1:6969"):
         super().__init__("whisparr", internal_url)
@@ -94,3 +108,16 @@ class WhisparrAdapter(ArrAdapter):
 class ProwlarrAdapter(ArrAdapter):
     def __init__(self, internal_url: str = "http://127.0.0.1:9696"):
         super().__init__("prowlarr", internal_url)
+
+    async def health_check(self) -> HealthStatus:
+        if not self.api_key:
+            return HealthStatus.UNCONFIGURED
+        try:
+            async with aiohttp.ClientSession() as session:
+                headers = {"X-Api-Key": self.api_key}
+                async with session.get(f"{self.internal_url}/api/v1/system/status", headers=headers, timeout=2) as resp:
+                    if resp.status == 200:
+                        return HealthStatus.HEALTHY
+                    return HealthStatus.ERROR
+        except Exception:
+            return HealthStatus.STOPPED
