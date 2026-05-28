@@ -10,14 +10,23 @@ done
 # Ensure download subdirectories exist
 mkdir -p /downloads/incomplete/torrents
 mkdir -p /downloads/incomplete/usenet
-mkdir -p /downloads/complete/torrents/{tv,movies,music,adult}
-mkdir -p /downloads/complete/usenet/{tv,movies,music,adult}
+mkdir -p /downloads/complete/torrents/tv
+mkdir -p /downloads/complete/torrents/movies
+mkdir -p /downloads/complete/torrents/music
+mkdir -p /downloads/complete/torrents/adult
+mkdir -p /downloads/complete/usenet/tv
+mkdir -p /downloads/complete/usenet/movies
+mkdir -p /downloads/complete/usenet/music
+mkdir -p /downloads/complete/usenet/adult
 
 # Ensure transcode subdirectories exist
-mkdir -p /transcode/{queue,working,completed,failed,logs}
+mkdir -p /transcode/queue
+mkdir -p /transcode/working
+mkdir -p /transcode/completed
+mkdir -p /transcode/failed
+mkdir -p /transcode/logs
 
-# Fix permissions for /config and /transcode
-# We use PUID/PGID if provided, otherwise default to 99:100 (Unraid)
+# Fix permissions
 CHOWN_USER="${PUID:-99}:${PGID:-100}"
 echo "[Nexus] Setting ownership to $CHOWN_USER..."
 chown -R "$CHOWN_USER" /config /downloads /transcode /tv /movies /music /adult

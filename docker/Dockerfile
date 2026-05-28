@@ -3,8 +3,8 @@
 # ============================================================
 
 # Stage 1: Pull pre-built Whisparr v3 (eros) from hotio image
-# This avoids compiling the entire .NET solution and NuGet timeout issues.
-FROM ghcr.io/hotio/whisparr:nightly AS whisparr-source
+# IMPORTANT: :v3 tag = Whisparr v3 (eros). :nightly tag = v2!
+FROM ghcr.io/hotio/whisparr:v3 AS whisparr-source
 
 # Stage 2: Pull Overseerr from the official image
 FROM sctx/overseerr:latest AS overseerr-source
@@ -54,6 +54,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libxml2 \
     libxslt1.1 \
     sqlite3 \
+    unrar \
     # FlareSolverr / Chromium dependencies
     xvfb \
     libnss3 \
@@ -134,7 +135,7 @@ RUN chmod +x /opt/Whisparr/Whisparr || true
 
 # Overseerr — pre-built from official image
 COPY --from=overseerr-source /app /opt/Overseerr
-RUN cd /opt/Overseerr && npm rebuild better-sqlite3 2>/dev/null || true
+RUN cd /opt/Overseerr && npm install sqlite3 --build-from-source 2>&1 || true
 
 # ---- Directory Structure ----
 RUN mkdir -p \
