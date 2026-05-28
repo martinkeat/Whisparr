@@ -32,8 +32,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python3 \
     python3-pip \
     python3-venv \
-    nodejs \
-    npm \
     xz-utils \
     tzdata \
     libicu74 \
@@ -94,7 +92,12 @@ RUN curl -L https://github.com/just-containers/s6-overlay/releases/download/v3.1
     tar -C / -Jxpf /tmp/s6-x86_64.tar.xz && \
     rm /tmp/s6-noarch.tar.xz /tmp/s6-x86_64.tar.xz
 
-# Set up virtual environment for Python services
+# Install Node.js 18 from NodeSource (fixes node-gyp missing metadata on Ubuntu 24.04)
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
+    apt-get install -y nodejs && \
+    npm install -g yarn
+
+# Setup Python Virtual Env for SABnzbd
 RUN python3 -m venv /app/venv
 ENV PATH="/app/venv/bin:$PATH"
 
