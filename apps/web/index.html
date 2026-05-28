@@ -46,13 +46,13 @@
                 </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="#requests">
+                <a class="nav-link" href="#" onclick="showView('requests')">
                   <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="ti ti-git-pull-request"></i></span>
                   <span class="nav-link-title">Requests</span>
                 </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="#downloads">
+                <a class="nav-link" href="#" onclick="showView('downloads')">
                   <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="ti ti-download"></i></span>
                   <span class="nav-link-title">Downloads</span>
                 </a>
@@ -63,22 +63,16 @@
                   <span class="nav-link-title">Media</span>
                 </a>
                 <div class="dropdown-menu">
-                  <a class="dropdown-item" href="#media-tv">TV</a>
-                  <a class="dropdown-item" href="#media-movies">Movies</a>
-                  <a class="dropdown-item" href="#media-music">Music</a>
-                  <a class="dropdown-item" href="#media-adult">Adult</a>
+                  <a class="dropdown-item" href="#" onclick="showView('media-tv')">TV</a>
+                  <a class="dropdown-item" href="#" onclick="showView('media-movies')">Movies</a>
+                  <a class="dropdown-item" href="#" onclick="showView('media-music')">Music</a>
+                  <a class="dropdown-item" href="#" onclick="showView('media-adult')">Adult</a>
                 </div>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="#indexers">
+                <a class="nav-link" href="#" onclick="showView('indexers')">
                   <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="ti ti-search"></i></span>
                   <span class="nav-link-title">Indexers</span>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="#transcoding">
-                  <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="ti ti-video"></i></span>
-                  <span class="nav-link-title">Transcoding</span>
                 </a>
               </li>
               <hr class="my-2">
@@ -192,6 +186,12 @@
                 </div>
               </div>
             </div>
+            
+            <div id="view-iframe" class="row row-deck row-cards d-none" style="height: calc(100vh - 12rem);">
+              <div class="col-12">
+                <iframe id="content-iframe" src="" style="width: 100%; height: 100%; border: none; border-radius: 4px;"></iframe>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -255,13 +255,67 @@
       function showView(viewName) {
         document.getElementById('view-dashboard').classList.add('d-none');
         document.getElementById('view-settings').classList.add('d-none');
-        document.getElementById('view-' + viewName).classList.remove('d-none');
+        document.getElementById('view-iframe').classList.add('d-none');
         
         document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
-        if (viewName === 'settings') {
-          loadSettings();
+        
+        if (viewName === 'dashboard' || viewName === 'settings') {
+            document.getElementById('view-' + viewName).classList.remove('d-none');
+            if (viewName === 'settings') {
+                loadSettings();
+            }
+        } else {
+            // It's an iframe view
+            document.getElementById('view-iframe').classList.remove('d-none');
+            const iframe = document.getElementById('content-iframe');
+            
+            // Map views to internal ports
+            const portMap = {
+                'requests': 5055,
+                'downloads': 8090, // default to qbittorrent
+                'media-tv': 8989,
+                'media-movies': 7878,
+                'media-music': 8686,
+                'media-adult': 6969,
+                'indexers': 9696
+            };
+            
+            if (portMap[viewName]) {
+                iframe.src = window.location.protocol + "//" + window.location.hostname + ":" + portMap[viewName];
+            }
         }
       }
+
+      async function controlService(name, action) {
+        try {
+          let url = '';
+          let method = 'POST';
+          let body = null;
+          
+          if (action === 'restart') {
+            url = `/api/services/${name}/restart`;
+          } else {
+            url = `/api/settings/toggle`;
+            body = JSON.stringify({ name: name, enabled: (action === 'start') });
+          }
+          
+          const response = await fetch(url, {
+            method: method,
+            headers: { 'Content-Type': 'application/json' },
+            body: body
+          });
+          
+          if (response.ok) {
+            updateStatus();
+          } else {
+            alert(`Failed to ${action} ${name}`);
+          }
+        } catch (error) {
+          console.error(`Failed to ${action} service:`, error);
+          alert(`Error attempting to ${action} ${name}`);
+        }
+      }
+
 
       async function loadSettings() {
         try {

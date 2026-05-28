@@ -45,6 +45,36 @@ class ArrAdapter(ServiceAdapter):
     async def collect_logs(self, lines: int = 100) -> List[str]:
         return [f"{self.name} logs placeholder"]
 
+    async def get_movie_count(self) -> int:
+        if not self.api_key:
+            return 0
+        try:
+            async with aiohttp.ClientSession() as session:
+                headers = {"X-Api-Key": self.api_key}
+                async with session.get(f"{self.internal_url}/api/v3/movie", headers=headers, timeout=5) as resp:
+                    if resp.status == 200:
+                        data = await resp.json()
+                        return len(data)
+        except Exception:
+            pass
+        return 0
+
+    async def get_episode_count(self) -> int:
+        if not self.api_key:
+            return 0
+        try:
+            async with aiohttp.ClientSession() as session:
+                headers = {"X-Api-Key": self.api_key}
+                async with session.get(f"{self.internal_url}/api/v3/series", headers=headers, timeout=5) as resp:
+                    if resp.status == 200:
+                        data = await resp.json()
+                        # Sum up the episodeFileCount or episodeCount
+                        return sum(series.get('statistics', {}).get('episodeFileCount', 0) for series in data)
+        except Exception:
+            pass
+        return 0
+
+
 class SonarrAdapter(ArrAdapter):
     def __init__(self, internal_url: str = "http://127.0.0.1:8989"):
         super().__init__("sonarr", internal_url)

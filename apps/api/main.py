@@ -141,6 +141,39 @@ async def status():
         "disk_free": "N/A"
     }
 
+    # Fetch stats concurrently
+    tasks = []
+    
+    if "radarr" in service_status and service_status["radarr"]["health"] == "healthy":
+        tasks.append(adapters["radarr"].get_movie_count())
+    else:
+        tasks.append(asyncio.sleep(0, result=0))
+
+    if "sonarr" in service_status and service_status["sonarr"]["health"] == "healthy":
+        tasks.append(adapters["sonarr"].get_episode_count())
+    else:
+        tasks.append(asyncio.sleep(0, result=0))
+
+    if "qbittorrent" in service_status and service_status["qbittorrent"]["health"] == "healthy":
+        tasks.append(adapters["qbittorrent"].get_active_downloads())
+    else:
+        tasks.append(asyncio.sleep(0, result=0))
+
+    if "sabnzbd" in service_status and service_status["sabnzbd"]["health"] == "healthy":
+        tasks.append(adapters["sabnzbd"].get_active_downloads())
+    else:
+        tasks.append(asyncio.sleep(0, result=0))
+
+    results = await asyncio.gather(*tasks, return_exceptions=True)
+    
+    stats["total_movies"] = results[0] if isinstance(results[0], int) else 0
+    stats["total_episodes"] = results[1] if isinstance(results[1], int) else 0
+    
+    qbit_dl = results[2] if isinstance(results[2], int) else 0
+    sab_dl = results[3] if isinstance(results[3], int) else 0
+    stats["active_downloads"] = qbit_dl + sab_dl
+
+
     # Try to get disk free space
     try:
         statvfs = os.statvfs('/config')

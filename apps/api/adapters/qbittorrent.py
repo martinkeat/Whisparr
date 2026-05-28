@@ -37,3 +37,15 @@ class QBittorrentAdapter(ServiceAdapter):
 
     async def collect_logs(self, lines: int = 100) -> List[str]:
         return ["qBittorrent logs placeholder"]
+
+    async def get_active_downloads(self) -> int:
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(f"{self.internal_url}/api/v2/torrents/info?filter=downloading", timeout=5) as resp:
+                    if resp.status == 200:
+                        data = await resp.json()
+                        return len(data)
+        except Exception:
+            pass
+        return 0
+
