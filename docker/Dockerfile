@@ -78,10 +78,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY --from=whisparr-source /lib/ld-musl-x86_64.so.1 /lib/ld-musl-x86_64.so.1
 COPY --from=whisparr-source /usr/lib/libstdc++.so.6 /usr/lib/musl-libstdc++.so.6
 COPY --from=whisparr-source /usr/lib/libgcc_s.so.1 /usr/lib/musl-libgcc_s.so.1
+COPY --from=whisparr-source /usr/lib/libssl.so.3 /usr/lib/musl-libssl.so.3
+COPY --from=whisparr-source /usr/lib/libcrypto.so.3 /usr/lib/musl-libcrypto.so.3
 RUN mkdir -p /opt/Whisparr/lib && \
     ln -sf /lib/ld-musl-x86_64.so.1 /lib/libc.musl-x86_64.so.1 && \
     ln -sf /usr/lib/musl-libstdc++.so.6 /opt/Whisparr/lib/libstdc++.so.6 && \
-    ln -sf /usr/lib/musl-libgcc_s.so.1 /opt/Whisparr/lib/libgcc_s.so.1
+    ln -sf /usr/lib/musl-libgcc_s.so.1 /opt/Whisparr/lib/libgcc_s.so.1 && \
+    ln -sf /usr/lib/musl-libssl.so.3 /opt/Whisparr/lib/libssl.so.3 && \
+    ln -sf /usr/lib/musl-libcrypto.so.3 /opt/Whisparr/lib/libcrypto.so.3
 
 # Install s6-overlay
 RUN curl -L https://github.com/just-containers/s6-overlay/releases/download/v3.1.6.2/s6-overlay-noarch.tar.xz -o /tmp/s6-noarch.tar.xz && \
@@ -135,7 +139,9 @@ RUN chmod +x /opt/Whisparr/Whisparr || true
 
 # Overseerr — pre-built from official image
 COPY --from=overseerr-source /app /opt/Overseerr
-RUN cd /opt/Overseerr && npm install sqlite3 --build-from-source 2>&1 || true
+RUN cd /opt/Overseerr && \
+    rm -rf node_modules/sqlite3/lib/binding/* && \
+    npm rebuild sqlite3 --build-from-source 2>&1 || true
 
 # ---- Directory Structure ----
 RUN mkdir -p \
